@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Web Application Server (PHP 8.2 + Apache)
+  app:
+    build: .
+    container_name: task_tracker_app
+    ports:
+      - "8080:80"
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASS=rootpassword
+      - DB_NAME=internship_task_tracker
+      - DB_PORT=3306
+    volumes:
+      - ./:/var/www/html
+      - ./uploads:/var/www/html/uploads
+    depends_on:
+      - db
+    restart: always
+
+  # MySQL Database Server
+  db:
+    image: mysql:8.0
+    container_name: task_tracker_db
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=internship_task_tracker
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/internship_tracker.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: always
+
+  # phpMyAdmin for visual database administration
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: task_tracker_pma
+    environment:
+      - PMA_HOST=db
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    restart: always
+
+volumes:
+  db_data:
+
